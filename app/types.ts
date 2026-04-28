@@ -7,6 +7,7 @@ export type Extracted = {
   paragraphs: string[];
   heroImage: string | null;
   publishedTime: string | null;
+  faviconUrl: string | null;
 };
 
 export type Theme = "light" | "dark" | "newspaper";

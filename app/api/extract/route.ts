@@ -28,6 +28,35 @@ function pickMeta(doc: Document, names: string[]): string | null {
   return null;
 }
 
+function pickFavicon(doc: Document, base: string): string | null {
+  const selectors = [
+    'link[rel="apple-touch-icon"]',
+    'link[rel="apple-touch-icon-precomposed"]',
+    'link[rel="icon"][sizes="192x192"]',
+    'link[rel="icon"][sizes="180x180"]',
+    'link[rel="icon"][sizes="64x64"]',
+    'link[rel="icon"][sizes="32x32"]',
+    'link[rel="shortcut icon"]',
+    'link[rel="icon"]',
+  ];
+  for (const sel of selectors) {
+    const el = doc.querySelector(sel);
+    const href = el?.getAttribute("href");
+    if (href) {
+      try {
+        return new URL(href, base).toString();
+      } catch {
+        // continue
+      }
+    }
+  }
+  try {
+    return new URL("/favicon.ico", base).toString();
+  } catch {
+    return null;
+  }
+}
+
 function extractParagraphs(html: string, max = 5): string[] {
   const dom = new JSDOM(`<!DOCTYPE html><body>${html}</body>`);
   const ps = Array.from(dom.window.document.querySelectorAll("p"));
@@ -115,5 +144,6 @@ export async function GET(req: NextRequest) {
     paragraphs,
     heroImage: absolutize(ogImage, parsed.toString()),
     publishedTime: ogPublished || null,
+    faviconUrl: pickFavicon(doc, parsed.toString()),
   });
 }

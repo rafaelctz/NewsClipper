@@ -1,6 +1,7 @@
 "use client";
 
 import { forwardRef } from "react";
+import { getBrandColor } from "./brandColors";
 import type { Aspect, Extracted, Theme } from "./types";
 
 const themeStyles: Record<
@@ -84,6 +85,9 @@ export const Card = forwardRef<HTMLDivElement, Props>(function Card(
   const date = formatDate(data.publishedTime);
   const paragraphs = data.paragraphs.slice(0, paragraphCount);
   const hero = showImage ? proxyImage(data.heroImage) : null;
+  const favicon = proxyImage(data.faviconUrl);
+  const brandColor =
+    theme === "newspaper" ? t.fg : getBrandColor(data.url, t.fg);
 
   const containerStyle: React.CSSProperties = {
     width: a.width,
@@ -91,10 +95,8 @@ export const Card = forwardRef<HTMLDivElement, Props>(function Card(
     backgroundColor: t.bg,
     color: t.fg,
     fontFamily: t.bodyFont,
-    padding: 64,
     display: "flex",
     flexDirection: "column",
-    gap: 28,
     boxSizing: "border-box",
     overflow: "hidden",
   };
@@ -103,19 +105,55 @@ export const Card = forwardRef<HTMLDivElement, Props>(function Card(
     <div ref={ref} style={containerStyle} data-card-root>
       <div
         style={{
+          height: 12,
+          backgroundColor: brandColor,
+          flexShrink: 0,
+        }}
+      />
+      <div
+        style={{
+          padding: "48px 64px 64px",
+          display: "flex",
+          flexDirection: "column",
+          gap: 28,
+          flex: 1,
+          minHeight: 0,
+        }}
+      >
+      <div
+        style={{
           display: "flex",
           alignItems: "center",
           justifyContent: "space-between",
           fontSize: 16,
-          letterSpacing: "0.18em",
+          letterSpacing: "0.16em",
           textTransform: "uppercase",
           fontWeight: 700,
           color: t.site,
           borderBottom: `2px solid ${t.rule}`,
           paddingBottom: 16,
+          gap: 16,
         }}
       >
-        <span>{data.siteName || new URL(data.url).hostname}</span>
+        <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+          {favicon && (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src={favicon}
+              alt=""
+              crossOrigin="anonymous"
+              style={{
+                width: 32,
+                height: 32,
+                borderRadius: 6,
+                objectFit: "cover",
+                display: "block",
+                backgroundColor: brandColor,
+              }}
+            />
+          )}
+          <span>{data.siteName || new URL(data.url).hostname}</span>
+        </div>
         {date && (
           <span style={{ color: t.muted, fontWeight: 500 }}>{date}</span>
         )}
@@ -187,6 +225,7 @@ export const Card = forwardRef<HTMLDivElement, Props>(function Card(
             {p}
           </p>
         ))}
+      </div>
       </div>
     </div>
   );
